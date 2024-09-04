@@ -5,7 +5,9 @@
 
 #include "Core.h"
 #include "Log.h"
+#include "Renderer/Buffer.h"
 #include "Renderer/Shader.h"
+#include "Renderer/VertexArray.h"
 
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 1200;
@@ -47,25 +49,24 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+	     0.5f,  0.5f, 0.0f,  // top right
+	     0.5f, -0.5f, 0.0f,  // bottom right
+	    -0.5f, -0.5f, 0.0f,  // bottom left
+	    -0.5f,  0.5f, 0.0f   // top left 
+    };
+    unsigned int indices[] = {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
     };
 
     // TEMP HARDCODED -
-    std::string VertexPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\VertexShaderT1.glsl)";
-    std::string FragmentPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\FragmentShaderT1.glsl)";
+    std::string VertexPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\TriangleVertexShader..glsl)";
+    std::string FragmentPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\TriangleFragShader.glsl)";
     Quiet::Shader TriangleShader = Quiet::Shader(VertexPath, FragmentPath);
-    TriangleShader.Bind();
 
-    uint32_t VertexArray;
-    glGenVertexArrays(1, &VertexArray);
-    glBindVertexArray(VertexArray);    
-
-	uint32_t VertexBuffer;
-    glGenBuffers(1, &VertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    Quiet::VertexArray VertexArray = Quiet::VertexArray();
+    Quiet::VertexBuffer VertexBuffer = Quiet::VertexBuffer(vertices, sizeof(vertices));
+    Quiet::IndexBuffer IndexBuffer = Quiet::IndexBuffer(indices, sizeof(indices));
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -82,8 +83,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         TriangleShader.Bind();
-        glBindVertexArray(VertexArray);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        VertexArray.Bind();
+        IndexBuffer.Bind();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
         // Check and call events and swap the buffers
@@ -91,8 +93,6 @@ int main()
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VertexArray);
-    glDeleteBuffers(1, &VertexBuffer);
     glfwTerminate();
     return 0;
 }
