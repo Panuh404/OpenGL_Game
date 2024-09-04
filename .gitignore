@@ -2,6 +2,9 @@
 Binaries/
 Intermediate/
 
+# Log Files
+*.log
+
 # Visual Studio
 .vs/
 **.vcxproj.filters

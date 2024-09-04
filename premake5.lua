@@ -4,8 +4,7 @@ workspace "Quiet"
 
     configurations{
         "Debug",
-        "Release",
-        "Dist"
+        "Release"
     }
 
     flags{

@@ -1,7 +1,14 @@
-
+#include <filesystem>
 #include <iostream>
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
+
+#include "Core.h"
+#include "Log.h"
+#include "Renderer/Shader.h"
+
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 1200;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -14,25 +21,55 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    Quiet::Log::Init();
+
     // Create a Window
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Game", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Game", NULL, NULL);
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        LOG_ERROR("Failed to create GLFW window")
         glfwTerminate();
         return -1;
     }
+	LOG_INFO("GLFW Window Success")
     glfwMakeContextCurrent(window);
 
     // Initialize Glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        LOG_ERROR("Failed to initialize GLAD")
         return -1;
     }
+	LOG_INFO("Glad Load Success")
+    
 
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    float vertices[] = {
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
+    };
+
+    // TEMP HARDCODED -
+    std::string VertexPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\VertexShaderT1.glsl)";
+    std::string FragmentPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\FragmentShaderT1.glsl)";
+    Quiet::Shader TriangleShader = Quiet::Shader(VertexPath, FragmentPath);
+    TriangleShader.Bind();
+
+    uint32_t VertexArray;
+    glGenVertexArrays(1, &VertexArray);
+    glBindVertexArray(VertexArray);    
+
+	uint32_t VertexBuffer;
+    glGenBuffers(1, &VertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+     
 
     // Render Loop
     while (!glfwWindowShouldClose(window))
@@ -44,11 +81,18 @@ int main()
         glClearColor(0.2f, 0.3f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        TriangleShader.Bind();
+        glBindVertexArray(VertexArray);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+
         // Check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    glDeleteVertexArrays(1, &VertexArray);
+    glDeleteBuffers(1, &VertexBuffer);
     glfwTerminate();
     return 0;
 }
