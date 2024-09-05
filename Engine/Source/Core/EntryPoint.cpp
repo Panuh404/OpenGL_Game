@@ -60,17 +60,24 @@ int main()
     };
 
     // TEMP HARDCODED -
-    std::string VertexPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\TriangleVertexShader..glsl)";
+    std::string VertexPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\TriangleVertexShader.glsl)";
     std::string FragmentPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\TriangleFragShader.glsl)";
-    Quiet::Shader TriangleShader = Quiet::Shader(VertexPath, FragmentPath);
 
     Quiet::VertexArray VertexArray = Quiet::VertexArray();
-    Quiet::VertexBuffer VertexBuffer = Quiet::VertexBuffer(vertices, sizeof(vertices));
-    Quiet::IndexBuffer IndexBuffer = Quiet::IndexBuffer(indices, sizeof(indices));
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-     
+    auto VertexBufferPtr = std::make_shared<Quiet::VertexBuffer>(vertices, sizeof(vertices));
+    VertexBufferPtr->SetLayout({
+        {Quiet::ShaderDataType::Float3, "a_Position"},
+		});
+    VertexArray.AddVertexBuffer(VertexBufferPtr);
+
+    auto IndexBufferPtr = std::make_shared<Quiet::IndexBuffer>(indices, sizeof(indices));
+    VertexArray.SetIndexBuffer(IndexBufferPtr);
+
+    auto TriangleShader = std::make_shared<Quiet::Shader>(VertexPath, FragmentPath);
+
+    glm::vec3 m_Color = { 0.8f, 0.8f, 0.4f };
+
 
     // Render Loop
     while (!glfwWindowShouldClose(window))
@@ -82,11 +89,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        TriangleShader.Bind();
-        VertexArray.Bind();
-        IndexBuffer.Bind();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        TriangleShader->Bind();
+        TriangleShader->SetFloat3("u_Color", m_Color);
 
+        VertexArray.Bind();
+        IndexBufferPtr->Bind();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Check and call events and swap the buffers
         glfwSwapBuffers(window);
