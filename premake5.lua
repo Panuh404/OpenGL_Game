@@ -19,6 +19,7 @@ IncludeDir["GLFW"] = 	"Engine/Vendor/GLFW/include"
 IncludeDir["Glad"] = 	"Engine/Vendor/Glad/include"
 IncludeDir["ImGui"] = 	"Engine/Vendor/ImGui"
 IncludeDir["glm"] = 	"Engine/Vendor/glm"
+IncludeDir["stb"] = 	"Engine/Vendor/stb"
 
 --include vendor dependencies group
 group "Dependencies"
@@ -56,6 +57,7 @@ project "Engine"
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.glm}",
+        "%{IncludeDir.stb}"
 	}
 
     links{
