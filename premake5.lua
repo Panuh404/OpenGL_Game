@@ -39,9 +39,13 @@ project "Engine"
     targetdir ("Binaries/" .. outputdir .. "/%{prj.name}")
     objdir ("Intermediate/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "Quiet_PCH.h"
+    pchsource "Engine/Source/Quiet_PCH.cpp"
+
     files{
         "%{prj.name}/Source/**.h",
         "%{prj.name}/Source/**.cpp",
+        "%{prj.name}/vendor/stb/**.h",
         "%{prj.name}/vendor/glm/glm/**.hpp",
         "%{prj.name}/vendor/glm/glm/**.inl"
     }

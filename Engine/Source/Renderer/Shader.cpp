@@ -1,10 +1,9 @@
+#include "Quiet_PCH.h"
 #include "Shader.h"
 
 #include <glad/glad.h>
 #include <fstream>
 
-#include "Core/Core.h"
-#include "Core/Log.h"
 #include "glm/gtc/type_ptr.hpp"
 
 namespace Quiet
@@ -37,17 +36,17 @@ namespace Quiet
 	std::string Shader::ReadFile(const std::string filepath)
 	{
 		std::string result;
-		std::ifstream in(filepath, std::ios::in | std::ios::binary);
-		if (in)
+		std::ifstream input(filepath, std::ios::in | std::ios::binary);
+		if (input)
 		{
-			in.seekg(0, std::ios::end);
-			size_t size = in.tellg();
+			input.seekg(0, std::ios::end);
+			size_t size = input.tellg();
 			if (size != -1)
 			{
 				result.resize(size);
-				in.seekg(0, std::ios::beg);
-				in.read(&result[0], size);
-				in.close();
+				input.seekg(0, std::ios::beg);
+				input.read(&result[0], size);
+				input.close();
 			}
 			else
 			{

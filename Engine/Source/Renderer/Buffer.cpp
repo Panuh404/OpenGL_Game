@@ -1,3 +1,5 @@
+#include "Quiet_PCH.h"
+
 #include "Buffer.h"
 
 #include <glad/glad.h>

@@ -56,7 +56,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Quiet_PCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;QT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>Source;vendor\spdlog\include;Vendor\GLFW\include;Vendor\Glad\include;Vendor\ImGui;Vendor\glm;Vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -76,7 +77,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Quiet_PCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;QT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>Source;vendor\spdlog\include;Vendor\GLFW\include;Vendor\Glad\include;Vendor\ImGui;Vendor\glm;Vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -100,6 +102,7 @@
   <ItemGroup>
     <ClInclude Include="Source\Core\Core.h" />
     <ClInclude Include="Source\Core\Log.h" />
+    <ClInclude Include="Source\Quiet_PCH.h" />
     <ClInclude Include="Source\Renderer\Buffer.h" />
     <ClInclude Include="Source\Renderer\Shader.h" />
     <ClInclude Include="Source\Renderer\Texture.h" />
@@ -521,11 +524,47 @@
     <ClInclude Include="vendor\glm\glm\vec3.hpp" />
     <ClInclude Include="vendor\glm\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
+    <ClInclude Include="vendor\stb\deprecated\rrsprintf.h" />
+    <ClInclude Include="vendor\stb\deprecated\stb.h" />
+    <ClInclude Include="vendor\stb\deprecated\stb_image_resize.h" />
+    <ClInclude Include="vendor\stb\deprecated\stretchy_buffer.h" />
+    <ClInclude Include="vendor\stb\stb_c_lexer.h" />
+    <ClInclude Include="vendor\stb\stb_connected_components.h" />
+    <ClInclude Include="vendor\stb\stb_divide.h" />
+    <ClInclude Include="vendor\stb\stb_ds.h" />
+    <ClInclude Include="vendor\stb\stb_dxt.h" />
+    <ClInclude Include="vendor\stb\stb_easy_font.h" />
+    <ClInclude Include="vendor\stb\stb_herringbone_wang_tile.h" />
+    <ClInclude Include="vendor\stb\stb_hexwave.h" />
+    <ClInclude Include="vendor\stb\stb_image.h" />
+    <ClInclude Include="vendor\stb\stb_image_resize2.h" />
+    <ClInclude Include="vendor\stb\stb_image_resize_test\old_image_resize.h" />
+    <ClInclude Include="vendor\stb\stb_image_write.h" />
+    <ClInclude Include="vendor\stb\stb_include.h" />
+    <ClInclude Include="vendor\stb\stb_leakcheck.h" />
+    <ClInclude Include="vendor\stb\stb_perlin.h" />
+    <ClInclude Include="vendor\stb\stb_rect_pack.h" />
+    <ClInclude Include="vendor\stb\stb_sprintf.h" />
+    <ClInclude Include="vendor\stb\stb_textedit.h" />
+    <ClInclude Include="vendor\stb\stb_tilemap_editor.h" />
+    <ClInclude Include="vendor\stb\stb_truetype.h" />
+    <ClInclude Include="vendor\stb\stb_voxel_render.h" />
+    <ClInclude Include="vendor\stb\tests\caveview\cave_parse.h" />
+    <ClInclude Include="vendor\stb\tests\caveview\caveview.h" />
+    <ClInclude Include="vendor\stb\tests\caveview\glext.h" />
+    <ClInclude Include="vendor\stb\tests\caveview\glext_list.h" />
+    <ClInclude Include="vendor\stb\tests\caveview\stb_gl.h" />
+    <ClInclude Include="vendor\stb\tests\caveview\stb_glprog.h" />
+    <ClInclude Include="vendor\stb\tests\oversample\stb_wingraph.h" />
+    <ClInclude Include="vendor\stb\tests\prerelease\stb_lib.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core\EntryPoint.cpp" />
     <ClCompile Include="Source\Core\Log.cpp" />
     <ClCompile Include="Source\ImGui\ImGuiBuild.cpp" />
+    <ClCompile Include="Source\Quiet_PCH.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Source\Renderer\Buffer.cpp" />
     <ClCompile Include="Source\Renderer\Shader.cpp" />
     <ClCompile Include="Source\Renderer\Texture.cpp" />
