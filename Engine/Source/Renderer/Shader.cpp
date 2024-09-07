@@ -90,10 +90,6 @@ namespace Quiet
 				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
 				LOG_ERROR("SHADER LINKING ERROR\n {0}", infoLog)
 			}
-			else
-			{
-				LOG_INFO("SHADER COMPILATION SUCCESS")
-			}
 		}
 	}
 
