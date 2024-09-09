@@ -4,8 +4,13 @@
 int main()
 {
 	Quiet::Log::Init();
+
+	// Application Startup
 	auto m_Application = Quiet::Application("Game");
+
+	// Runtime Application
 	m_Application.Run();
-	m_Application.Shutdown();
+
+
 	return 0;
 }

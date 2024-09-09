@@ -1,8 +1,13 @@
 #include "Quiet_PCH.h"
 #include "Application.h"
 
+#include "Input.h"
+
+
 namespace Quiet
 {
+	Application* Application::s_Instance = nullptr;
+
 	// Settings
 	const uint32_t SCR_WIDTH = 1600;
 	const uint32_t SCR_HEIGHT = 1200;
@@ -69,57 +74,14 @@ namespace Quiet
 
 	Application::Application(const std::string& name)
 	{
-		glfwInit();
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-		// Create a Window
-		m_Window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, name.c_str(), NULL, NULL);
-		if (m_Window == NULL)
-		{
-			QT_ASSERT(false, "Failed to create GLFW window")
-			glfwTerminate();
-		}
-		glfwMakeContextCurrent(m_Window);
-		glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
-		{
-			glViewport(0, 0, width, height);
-		});
-		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xposIn, double yposIn)
-		{
-			float xpos = static_cast<float>(xposIn);
-			float ypos = static_cast<float>(yposIn);
-
-			if (firstMouse)
-			{
-				lastX = xpos;
-				lastY = ypos;
-				firstMouse = false;
-			}
-
-			float xoffset = xpos - lastX;
-			float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-			lastX = xpos;
-			lastY = ypos;
-			m_Camera->MouseEvents(xoffset, yoffset);
-		});
-		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset)
-		{
-			m_Camera->MouseWheelEvents(static_cast<float>(yoffset));
-		});
-
-		// tell GLFW to capture our mouse
-		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-		// Initialize Glad
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-		{
-			QT_ASSERT(false, "Failed to initialize GLAD")
-		}
-
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		s_Instance = this;
+		WindowProps props = {
+			"Test",
+			1600,
+			1200,
+		};
+		m_Window = std::make_unique<Window>(props);
+		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 
 		m_TestShader = std::make_shared<Shader>(VertexPath, FragmentPath);
 		m_TestTexture = std::make_shared<Texture2D>(TexturePath);
@@ -138,10 +100,19 @@ namespace Quiet
 		m_Camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
 	}
 
+	void Application::OnEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
+
+		m_Camera->OnEvent(event);
+	}
+
 	void Application::Run()
 	{
 		// Render Loop
-		while (!glfwWindowShouldClose(m_Window))
+		while (m_Running)
 		{
 			// Per-Frame DeltaTime
 			float currentFrame = static_cast<float>(glfwGetTime());
@@ -149,7 +120,11 @@ namespace Quiet
 			lastFrame = currentFrame;
 
 			// Input
-			ProcessInput(m_Window);
+			m_Camera->OnUpdate(deltaTime);
+			if (Input::IsKeyPressed(Key::Escape))
+			{
+				m_Running = false;
+			}
 
 			// Rendering
 			glEnable(GL_DEPTH_TEST);
@@ -176,29 +151,20 @@ namespace Quiet
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 
-			glfwSwapInterval(1);
-			glfwSwapBuffers(m_Window);
-			glfwPollEvents();
+			m_Window->SetVSync(true);
+			m_Window->OnUpdate();
 		}
 	}
 
-	void Application::Shutdown()
+	bool Application::OnWindowClose(WindowCloseEvent& event)
 	{
-		glfwTerminate();
+		m_Running = false;
+		return true;
 	}
 
-	void Application::ProcessInput(GLFWwindow* window)
+	bool Application::OnWindowResize(WindowResizeEvent& event)
 	{
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-			glfwSetWindowShouldClose(window, true);
-
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			m_Camera->KeyboardEvents(FORWARD, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			m_Camera->KeyboardEvents(BACKWARD, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			m_Camera->KeyboardEvents(LEFT, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			m_Camera->KeyboardEvents(RIGHT, deltaTime);
+		glViewport(0, 0, event.GetWidth(), event.GetHeight());
+		return false;
 	}
 }

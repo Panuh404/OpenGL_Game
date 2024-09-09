@@ -4,6 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Event/ApplicationEvent.h"
+#include "Event/MouseEvent.h"
+
 namespace Quiet
 {
 	// Possible options for camera movement
@@ -26,14 +29,13 @@ namespace Quiet
 	{
 	public:
 		Camera(glm::vec3 position = glm::vec3(0.0f,0.0f,0.0f), glm::vec3 up = glm::vec3(0.0f,1.0f,0.0f), float yaw = YAW, float pitch = PITCH);
-		Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
+
+		void OnUpdate(float deltaTime);
+		void OnEvent(Event& event);
 
 		glm::mat4 GetViewMatrix();
 
-		void KeyboardEvents(CameraMovement direction, float deltaTime);
-		void MouseEvents(float xOffset, float yOffset, GLboolean constrainPitch = true);
-		void MouseWheelEvents(float yOffset);
-
+	public:
 		// camera options
 		float MovementSpeed;
 		float MouseSensitivity;
@@ -52,5 +54,9 @@ namespace Quiet
 
 	private:
 		void UpdateCameraVectors();
+		bool OnMouseMoved(MouseMovedEvent& event);
+
+		float lastX = 0.0f, lastY = 0.0f;
+		bool firstMouse = true;
 	};
 }
