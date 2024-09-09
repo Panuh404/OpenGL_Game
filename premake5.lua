@@ -45,9 +45,9 @@ project "Engine"
     files{
         "%{prj.name}/Source/**.h",
         "%{prj.name}/Source/**.cpp",
-        "%{prj.name}/vendor/stb/**.h",
-        "%{prj.name}/vendor/glm/glm/**.hpp",
-        "%{prj.name}/vendor/glm/glm/**.inl"
+        "%{prj.name}/Vendor/stb/**.h",
+        "%{prj.name}/Vendor/glm/glm/**.hpp",
+        "%{prj.name}/Vendor/glm/glm/**.inl"
     }
 
     defines{
@@ -56,7 +56,7 @@ project "Engine"
 
     includedirs{
 		"%{prj.name}/Source",
-        "%{prj.name}/vendor/spdlog/include",
+        "%{prj.name}/Vendor/spdlog/include",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",

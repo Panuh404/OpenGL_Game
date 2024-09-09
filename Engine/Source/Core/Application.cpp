@@ -8,70 +8,6 @@ namespace Quiet
 {
 	Application* Application::s_Instance = nullptr;
 
-	// Settings
-	const uint32_t SCR_WIDTH = 1600;
-	const uint32_t SCR_HEIGHT = 1200;
-
-	// Camera
-	float lastX = SCR_WIDTH / 2.0f;
-	float lastY = SCR_HEIGHT / 2.0f;
-	bool firstMouse = true;
-
-	// timing
-	float deltaTime = 0.0f;	// time between current frame and last frame
-	float lastFrame = 0.0f;
-
-	std::shared_ptr<Camera> m_Camera;
-
-	float vertices[] = {
-		// Position         // Tex Coords
-	   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	   -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-	   -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	   -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	   -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	   -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	   -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	   -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	   -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	   -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	   -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	   -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	   -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	   -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	   -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	   -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	   -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
-	unsigned int indices[] = {  // note that we start from 0!
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
-	};
-
 	Application::Application(const std::string& name)
 	{
 		s_Instance = this;
@@ -83,21 +19,21 @@ namespace Quiet
 		m_Window = std::make_unique<Window>(props);
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 
-		m_TestShader = std::make_shared<Shader>(VertexPath, FragmentPath);
-		m_TestTexture = std::make_shared<Texture2D>(TexturePath);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_DEPTH_TEST);
+	}
 
-		m_VertexArray = std::make_shared<VertexArray>();
+	void Application::PushLayer(Layer* layer)
+	{
+		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
+	}
 
-		m_VertexBuffer = std::make_shared<VertexBuffer>(vertices, sizeof(vertices));
-		m_VertexBuffer->SetLayout({
-			{ShaderDataType::Float3, "a_Position"},
-			{ShaderDataType::Float2, "a_TexCoord"},
-			});
-		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
-
-		m_IndexBuffer = std::make_shared<IndexBuffer>(indices, sizeof(indices));
-		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
-		m_Camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+	void Application::PushOverlay(Layer* overlay)
+	{
+		m_LayerStack.PushOverlay(overlay);
+		overlay->OnAttach();
 	}
 
 	void Application::OnEvent(Event& event)
@@ -106,51 +42,39 @@ namespace Quiet
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
 
-		m_Camera->OnEvent(event);
+		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
+		{
+			if (event.m_Handled)
+				break;
+			(*it)->OnEvent(event);
+		}
 	}
 
 	void Application::Run()
 	{
-		// Render Loop
+		// Application Loop
 		while (m_Running)
 		{
-			// Per-Frame DeltaTime
-			float currentFrame = static_cast<float>(glfwGetTime());
-			deltaTime = currentFrame - lastFrame;
-			lastFrame = currentFrame;
+			// Time step
+			float time = (float)glfwGetTime();
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
 
-			// Input
-			m_Camera->OnUpdate(deltaTime);
+			// Exit
 			if (Input::IsKeyPressed(Key::Escape))
 			{
 				m_Running = false;
 			}
 
-			// Rendering
-			glEnable(GL_DEPTH_TEST);
-			glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			if (!m_Minimized)
+			{
+				{
+					for (Layer* layer : m_LayerStack)
+						layer->OnUpdate(timestep);					
+				}
+			}
 
-			// Texture and Shader Binds
-			m_TestTexture->Bind(0);
-			m_TestShader->Bind();
-
-			// Transformations
-			glm::mat4 projection = glm::perspective(glm::radians(m_Camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-			m_TestShader->SetMat4("u_Projection", projection);
-
-			glm::mat4 view = m_Camera->GetViewMatrix();
-			m_TestShader->SetMat4("u_View", view);
-
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-			m_TestShader->SetMat4("u_Model", model);
-
-			m_VertexArray->Bind();
-			m_IndexBuffer->Bind();
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-
+			// Window
 			m_Window->SetVSync(true);
 			m_Window->OnUpdate();
 		}
@@ -164,6 +88,12 @@ namespace Quiet
 
 	bool Application::OnWindowResize(WindowResizeEvent& event)
 	{
+		if (event.GetWidth() == 0 || event.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+		m_Minimized = false;
 		glViewport(0, 0, event.GetWidth(), event.GetHeight());
 		return false;
 	}

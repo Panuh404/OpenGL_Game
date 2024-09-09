@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Layer.h"
+#include "LayerStack.h"
 #include "Renderer/Buffer.h"
 #include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
@@ -16,6 +18,9 @@ namespace Quiet
 		Application(const std::string& name);
 
 		void OnEvent(Event& event);
+		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* overlay);
+
 		void Run();
 
 		static Application& Get() { return *s_Instance; }
@@ -29,17 +34,11 @@ namespace Quiet
 		std::unique_ptr<Window> m_Window;
 
 		bool m_Running = true;
-		
-		std::shared_ptr<Shader>		m_TestShader;
-		std::shared_ptr<Texture2D>	m_TestTexture;
+		bool m_Minimized = false;
+		LayerStack m_LayerStack;
 
-		std::shared_ptr<VertexArray>	m_VertexArray;
-		std::shared_ptr<VertexBuffer>	m_VertexBuffer;
-		std::shared_ptr<IndexBuffer>	m_IndexBuffer;
-
-		// Still fucking hardcoded
-		std::string VertexPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\VertexShader.glsl)";
-		std::string FragmentPath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Shaders\FragShader.glsl)";
-		std::string TexturePath = R"(D:\Code\Shooter_OpenGL\Engine\Assets\Textures\container.jpg)";
+		float m_LastFrameTime = 0.0f;
 	};
+
+	Application* CreateApplication();
 }
